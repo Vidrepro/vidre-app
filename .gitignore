@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+.env.local
+.env*.local
+.DS_Store
+*.log
+
+# Claude Code (lokale, machine-specifieke instellingen)
+.claude/settings.local.json
+
+# Vercel
+.vercel
+
+# TypeScript / Next
+*.tsbuildinfo
+next-env.d.ts
