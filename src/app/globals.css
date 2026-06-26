@@ -242,7 +242,8 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 
 /* Achtergrond-laag in huisstijl-grijs met diepte (3D-perspectief) */
 .login-bg {
-  position: fixed; inset: 0; z-index: 0; overflow: hidden;
+  /* expliciete offsets i.p.v. `inset` (oude Safari kent de shorthand niet) */
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; overflow: hidden;
   perspective: 1500px; perspective-origin: 50% 38%;
   background:
     radial-gradient(1100px 640px at 50% -8%, #fafbfb 0%, rgba(250,251,251,0) 56%),
@@ -250,7 +251,7 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 }
 /* Trage lichtbreking-gloed, als licht door glas */
 .login-bg::after {
-  content: ''; position: absolute; inset: -25%;
+  content: ''; position: absolute; top: -25%; right: -25%; bottom: -25%; left: -25%;
   background:
     conic-gradient(from 0deg at 50% 50%,
       rgba(95,128,137,.10), rgba(255,255,255,.16), rgba(95,128,137,.08),
@@ -283,10 +284,13 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 .login-wrap {
   position: relative; z-index: 1;
   min-height: 100vh; min-height: 100dvh;
-  display: flex; align-items: center; justify-content: center; padding: 28px;
+  /* kolom + center: kaart altijd netjes gecentreerd en binnen het scherm,
+     ook op telefoon (voorkomt dat de kaart rechts buiten beeld valt) */
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px;
 }
 .login-card {
-  width: 100%; max-width: 420px;
+  width: 100%; max-width: 400px;
   background: rgba(255,255,255,.74);
   -webkit-backdrop-filter: blur(26px) saturate(1.4);
   backdrop-filter: blur(26px) saturate(1.4);
@@ -339,11 +343,12 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 .login-pw-toggle:hover { color: var(--ink); background: var(--surface-2); }
 
 .login-error {
-  display: flex; align-items: center; gap: 9px;
+  display: flex; align-items: center;
   background: #fbeeec; border: 1px solid #e8cfc9; color: var(--danger);
   font-size: 13px; padding: 11px 13px; border-radius: var(--radius-sm); margin: 2px 0 16px;
 }
-.login-error .ic { width: 16px; height: 16px; stroke: var(--danger); flex-shrink: 0; }
+/* marge i.p.v. flex-gap (oude Safari < 14.1 ondersteunt gap niet) */
+.login-error .ic { width: 16px; height: 16px; stroke: var(--danger); flex-shrink: 0; margin-right: 9px; }
 
 .login-submit {
   width: 100%; margin-top: 8px; height: 54px; padding: 0 18px;
@@ -353,16 +358,17 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 .login-submit:hover { box-shadow: 0 8px 20px rgba(63,63,68,.26), var(--shadow-sm); }
 
 .login-foot {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
+  display: flex; align-items: center; justify-content: center;
   margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line);
   font-size: 12px; color: var(--ink-3);
 }
-.login-foot .ic { width: 14px; height: 14px; stroke: var(--ink-3); }
+.login-foot .ic { width: 14px; height: 14px; stroke: var(--ink-3); margin-right: 7px; }
 
 @media (max-width: 480px) {
-  .login-wrap { padding: 18px; align-items: stretch; }
-  .login-card { max-width: none; padding: 38px 24px 26px; border-radius: 20px; margin: auto 0; }
+  .login-wrap { padding: 16px; }
+  .login-card { padding: 34px 22px 24px; border-radius: 20px; }
   .login-logo { height: 46px; }
+  .login-intro { margin-bottom: 26px; }
 }
 
 @media (prefers-reduced-motion: reduce){ #vidre-app *, #vidre-app *::before, #vidre-app *::after { animation: none !important; transition: none !important; } }
