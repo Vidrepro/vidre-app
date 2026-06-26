@@ -3,20 +3,29 @@
 import { useEffect } from 'react';
 
 /**
- * Registreert de service worker — alleen in productie.
- * In dev laten we hem met rust om caching-verrassingen te voorkomen.
+ * Ruimt eventuele eerder geregistreerde service workers en hun caches op.
+ *
+ * De PWA-cache zorgde voor verouderde, niet-werkende pagina's op iOS (knoppen
+ * deden niets, inloggen verviel in een refresh). De app draait altijd online
+ * en heeft geen offline-cache nodig, dus we registreren niets meer en maken
+ * bestaande registraties actief ongedaan. De kill-switch in /sw.js handelt de
+ * apparaten af waar de oude, vastgelopen JavaScript niet meer draait.
  */
 export default function ServiceWorkerRegister() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') return;
-    if (!('serviceWorker' in navigator)) return;
-    const onLoad = () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {
-        /* registratie mislukt — app werkt gewoon online verder */
-      });
-    };
-    window.addEventListener('load', onLoad);
-    return () => window.removeEventListener('load', onLoad);
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    navigator.serviceWorker
+      .getRegistrations?.()
+      .then((regs) => regs.forEach((r) => r.unregister()))
+      .catch(() => {});
+
+    if ('caches' in window) {
+      caches
+        .keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .catch(() => {});
+    }
   }, []);
 
   return null;
