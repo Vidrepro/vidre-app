@@ -6,6 +6,14 @@ interface Props {
   ready: boolean;
 }
 
+async function logout() {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } finally {
+    window.location.href = '/login';
+  }
+}
+
 export default function AppBar({ orderRef, pct, ready }: Props) {
   return (
     <header className="appbar">
@@ -34,6 +42,9 @@ export default function AppBar({ orderRef, pct, ready }: Props) {
             <span className="progress-pct">{pct}%</span>
           </div>
           <span className={`chip ${ready ? 'chip-ready' : 'chip-draft'}`}>{ready ? 'Gereed' : 'Concept'}</span>
+          <button type="button" className="appbar-logout" onClick={logout} title="Uitloggen">
+            Uitloggen
+          </button>
         </div>
       </div>
     </header>
