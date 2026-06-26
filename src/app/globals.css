@@ -56,6 +56,8 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 .chip { font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
 .chip-draft { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
 .chip-ready { background: var(--accent-soft); color: #355d66; border: 1px solid #cfe0e3; }
+.appbar-logout { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--ink-3); background: transparent; border: none; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: color .15s, background .15s; }
+.appbar-logout:hover { color: var(--ink); background: rgba(0,0,0,.04); }
 
 /* LAYOUT */
 .layout { max-width: 1240px; margin: 0 auto; padding: 22px; display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 22px; align-items: start; }
@@ -234,5 +236,15 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
 .vdoc-sketch { border: 1px solid #e4e4e6; border-radius: 8px; padding: 8px; }
 .vdoc-sketch img { display: block; max-width: 100%; }
 .vdoc-foot { margin-top: 26px; padding-top: 14px; border-top: 1px solid #e4e4e6; font-size: 10.5px; color: #9a9aa0; display: flex; justify-content: space-between; }
+
+/* LOGIN */
+.login-wrap { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.login-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 28px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
+.login-logo { height: 34px; width: auto; align-self: flex-start; margin-bottom: 22px; }
+.login-title { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.login-sub { font-size: 13.5px; color: var(--ink-3); margin: 4px 0 22px; }
+.login-card .field { margin-bottom: 14px; }
+.login-error { background: #fbeeec; border: 1px solid #e8cfc9; color: var(--danger); font-size: 13px; padding: 10px 12px; border-radius: var(--radius-sm); margin: 2px 0 14px; }
+.login-submit { width: 100%; margin-top: 6px; }
 
 @media (prefers-reduced-motion: reduce){ #vidre-app *, #vidre-app *::after { animation: none !important; transition: none !important; } }
