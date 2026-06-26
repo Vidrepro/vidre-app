@@ -29,41 +29,90 @@ const SketchPad = forwardRef<SketchHandle, Props>(function SketchPad({ opmerking
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const pos = (e: PointerEvent) => {
+    // Schaal schermcoördinaten naar de interne canvasresolutie (1200×420).
+    const posFrom = (clientX: number, clientY: number) => {
       const r = canvas.getBoundingClientRect();
       return {
-        x: (e.clientX - r.left) * (canvas.width / r.width),
-        y: (e.clientY - r.top) * (canvas.height / r.height),
+        x: (clientX - r.left) * (canvas.width / r.width),
+        y: (clientY - r.top) * (canvas.height / r.height),
       };
     };
-    const down = (e: PointerEvent) => {
+    const start = (clientX: number, clientY: number) => {
       drawing.current = true;
-      canvas.setPointerCapture(e.pointerId);
-      const p = pos(e);
+      const p = posFrom(clientX, clientY);
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
     };
-    const move = (e: PointerEvent) => {
+    const extend = (clientX: number, clientY: number) => {
       if (!drawing.current) return;
-      const p = pos(e);
+      const p = posFrom(clientX, clientY);
       ctx.lineTo(p.x, p.y);
       ctx.stroke();
-      e.preventDefault();
     };
-    const up = () => {
+    const end = () => {
       drawing.current = false;
     };
 
-    canvas.addEventListener('pointerdown', down);
-    canvas.addEventListener('pointermove', move);
-    canvas.addEventListener('pointerup', up);
-    canvas.addEventListener('pointercancel', up);
-    return () => {
-      canvas.removeEventListener('pointerdown', down);
-      canvas.removeEventListener('pointermove', move);
-      canvas.removeEventListener('pointerup', up);
-      canvas.removeEventListener('pointercancel', up);
-    };
+    const cleanups: Array<() => void> = [];
+
+    // Pointer Events waar beschikbaar (modern). Oude iPad/Safari (< iOS 13)
+    // ondersteunt die niet — daar vallen we terug op touch- en muis-events,
+    // anders kan de monteur niet tekenen.
+    const supportsPointer = typeof window.PointerEvent !== 'undefined';
+    if (supportsPointer) {
+      const down = (e: PointerEvent) => {
+        if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+        start(e.clientX, e.clientY);
+      };
+      const move = (e: PointerEvent) => {
+        if (!drawing.current) return;
+        extend(e.clientX, e.clientY);
+        e.preventDefault();
+      };
+      canvas.addEventListener('pointerdown', down);
+      canvas.addEventListener('pointermove', move);
+      canvas.addEventListener('pointerup', end);
+      canvas.addEventListener('pointercancel', end);
+      cleanups.push(() => {
+        canvas.removeEventListener('pointerdown', down);
+        canvas.removeEventListener('pointermove', move);
+        canvas.removeEventListener('pointerup', end);
+        canvas.removeEventListener('pointercancel', end);
+      });
+    } else {
+      // Touch (oude iOS Safari). preventDefault houdt het scrollen tegen.
+      const tStart = (e: TouchEvent) => {
+        const t = e.touches[0];
+        if (t) start(t.clientX, t.clientY);
+        e.preventDefault();
+      };
+      const tMove = (e: TouchEvent) => {
+        const t = e.touches[0];
+        if (t) extend(t.clientX, t.clientY);
+        e.preventDefault();
+      };
+      canvas.addEventListener('touchstart', tStart, { passive: false });
+      canvas.addEventListener('touchmove', tMove, { passive: false });
+      canvas.addEventListener('touchend', end);
+      canvas.addEventListener('touchcancel', end);
+      // Muis (oudere desktopbrowsers).
+      const mDown = (e: MouseEvent) => start(e.clientX, e.clientY);
+      const mMove = (e: MouseEvent) => extend(e.clientX, e.clientY);
+      canvas.addEventListener('mousedown', mDown);
+      canvas.addEventListener('mousemove', mMove);
+      window.addEventListener('mouseup', end);
+      cleanups.push(() => {
+        canvas.removeEventListener('touchstart', tStart);
+        canvas.removeEventListener('touchmove', tMove);
+        canvas.removeEventListener('touchend', end);
+        canvas.removeEventListener('touchcancel', end);
+        canvas.removeEventListener('mousedown', mDown);
+        canvas.removeEventListener('mousemove', mMove);
+        window.removeEventListener('mouseup', end);
+      });
+    }
+
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   useImperativeHandle(ref, () => ({

@@ -371,4 +371,33 @@ html, body { margin: 0; padding: 0; background: #ebebec; }
   .login-intro { margin-bottom: 26px; }
 }
 
+/* ── Oude Safari (< 14.1): flex-gap fallback ──────────────────────────────────
+   Safari kreeg flex-`gap` én de `inset`-shorthand allebei pas in 14.1, dus
+   "geen inset" is een betrouwbare proxy voor "geen flex-gap". Daarbinnen
+   vervangen we de flex-gaps door marges zodat alles uitgelijnd blijft op oude
+   iPads. Grid-`gap` werkt al vanaf iOS 12 en blijft ongemoeid. */
+@supports not (inset: 0px) {
+  .appbar-inner   > * + * { margin-left: 16px; }
+  .appbar-brand   > * + * { margin-left: 14px; }
+  .appbar-meta    > * + * { margin-left: 14px; }
+  .form-column    > * + * { margin-top: 18px; }
+  .notice         > * + * { margin-left: 11px; }
+  .card-head      > * + * { margin-left: 13px; }
+  .check          > * + * { margin-left: 11px; }
+  .price-cell     > * + * { margin-left: 4px; }
+  .foot-total     > * + * { margin-left: 10px; }
+  .summary-rows   > * + * { margin-top: 10px; }
+  .summary-actions > * + * { margin-top: 9px; }
+  .btn            > * + * { margin-left: 8px; }
+  .mobilebar      > * + * { margin-left: 10px; }
+  .modal-actions  > * + * { margin-left: 9px; }
+  .toast          > * + * { margin-left: 10px; }
+  .vdoc-cell      > * + * { margin-left: 8px; }
+  .vdoc-chip      > * + * { margin-left: 6px; }
+  /* wrap-containers: marge op alle kinderen (benadert gap op beide assen) */
+  .table-foot > * { margin: 6px 12px 0 0; }
+  .segmented  > * { margin: 0 6px 0 0; }
+  .vdoc-chips > * { margin: 0 7px 7px 0; }
+}
+
 @media (prefers-reduced-motion: reduce){ #vidre-app *, #vidre-app *::before, #vidre-app *::after { animation: none !important; transition: none !important; } }
