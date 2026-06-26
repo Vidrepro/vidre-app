@@ -34,11 +34,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Ongeldige aanvraag.' }, { status: 400 });
   }
 
-  if (!safeEqual(username, expectedUser) || !safeEqual(password, expectedPass)) {
+  // Toleranter voor het gedeelde monteurs-account: gebruikersnaam
+  // hoofdletter-ongevoelig en omringende spaties (bijv. van autofill of
+  // mobiele toetsenborden) eraf. Wachtwoord alleen trimmen, niet lowercasen.
+  const normUser = username.trim().toLowerCase();
+  const normPass = password.trim();
+  const normExpectedUser = expectedUser.trim().toLowerCase();
+  const normExpectedPass = expectedPass.trim();
+
+  if (!safeEqual(normUser, normExpectedUser) || !safeEqual(normPass, normExpectedPass)) {
     return NextResponse.json({ ok: false, error: 'Onjuiste gebruikersnaam of wachtwoord.' }, { status: 401 });
   }
 
-  const token = await createSession(username, secret);
+  const token = await createSession(normUser, secret);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
